@@ -21,7 +21,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: api
-          image: protected-inference:0.1
+          image: protected-inference:0.2
           # Required for kind. The image lives on your machine, not in a
           # registry. "Always" would make Kubernetes try to download it
           # and fail with ErrImagePull.

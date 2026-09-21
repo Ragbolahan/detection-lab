@@ -12,8 +12,8 @@ COPY app ./app
 
 # Run as a normal user, not root. If the app is ever compromised, the
 # attacker does not get root inside the container.
-RUN useradd --create-home appuser
-USER appuser
+RUN useradd --create-home  --uid 10001 appuser
+USER 10001
 
 ENV SESSION_FILE=/tmp/sessions.json
 EXPOSE 8000
