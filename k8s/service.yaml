@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: protected-inference
+spec:
+  selector:
+    app: protected-inference
+  ports:
+    - port: 8000
+      targetPort: 8000

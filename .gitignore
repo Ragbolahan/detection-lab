@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Never commit session files, even lab ones
+sessions.json
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db

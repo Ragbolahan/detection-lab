@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protected-inference
+  labels:
+    app: protected-inference
+spec:
+  # One replica on purpose. Sessions live in a file inside the pod, so a
+  # second pod would not know about the first pod's sessions and logins
+  # would randomly fail. This is a good interview point about state.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: protected-inference
+  template:
+    metadata:
+      labels:
+        app: protected-inference
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: api
+          image: protected-inference:0.1
+          # Required for kind. The image lives on your machine, not in a
+          # registry. "Always" would make Kubernetes try to download it
+          # and fail with ErrImagePull.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: EVENT_HASH_KEY
+              value: "lab-only-change-me"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          # Is the app ready to take traffic?
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          # Is the app still alive? If not, Kubernetes restarts it.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
