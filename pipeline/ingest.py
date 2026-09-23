@@ -22,6 +22,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from pipeline.store import connect, store_events  # noqa: E402
+
 # Every event must have these, or we do not trust it.
 REQUIRED_FIELDS = ("ts", "event_type", "identity", "context", "action")
 
@@ -100,13 +103,21 @@ def report(lines, events, skipped):
             snippet = text[:70] + ("..." if len(text) > 70 else "")
             print(f"  line {number} ({reason}): {snippet}")
 
-
 def main():
     source = sys.argv[1] if len(sys.argv) > 1 else "tests/fixtures/sample_events.log"
     lines = read_lines(source)
     events, skipped = ingest(lines)
     report(lines, events, skipped)
 
+    conn = connect()
+    new, duplicates = store_events(conn, events)
+    total = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+    conn.close()
+
+    print("\nStored:")
+    print(f"  new rows written:    {new}")
+    print(f"  duplicates ignored:  {duplicates}")
+    print(f"  total rows in store: {total}")
 
 if __name__ == "__main__":
     main()
