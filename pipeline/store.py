@@ -17,11 +17,12 @@ than from what an earlier version of this code understood.
 
 import hashlib
 import json
+import os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-DEFAULT_DB = Path("data/events.db")
+DEFAULT_DB = "data/events.db"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
@@ -65,8 +66,19 @@ def event_id(event):
     return hashlib.sha256(canonical.encode()).hexdigest()[:32]
 
 
-def connect(db_path=DEFAULT_DB):
-    db_path = Path(db_path)
+def connect(db_path=None):
+    """Open the store and make sure its tables exist.
+
+    The path is resolved when this is called, not when the module is
+    imported, and the LAB_DB environment variable wins, so tests can point
+    the pipeline at a throwaway database.
+
+    If the database cannot be opened, this raises. It does not return None
+    and it does not quietly fall back to somewhere else, because a pipeline
+    writing to the wrong place while reporting success is worse than one
+    that stops.
+    """
+    db_path = Path(db_path or os.environ.get("LAB_DB") or DEFAULT_DB)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.executescript(SCHEMA)

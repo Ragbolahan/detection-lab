@@ -103,6 +103,9 @@ def run(conn, name):
 def main():
     wanted = sys.argv[1:] or list(QUERIES)
     conn = connect()
+    if conn is None:
+        raise RuntimeError("Failed to connect to the event store")
+
     for name in wanted:
         if name not in QUERIES:
             print(f"Unknown query: {name}. Available: {', '.join(QUERIES)}")
