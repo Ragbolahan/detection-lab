@@ -484,6 +484,3 @@ SQLite is right at this size and wrong at a thousand times the volume.
   on-call rota already works rather than in a command-line flag.
 
 ---
-
-*Built with the assistance of Claude Code. The architecture, the design decisions and the
-trade-offs documented above are mine.*
